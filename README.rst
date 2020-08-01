@@ -1,7 +1,7 @@
-Dynamic Python Path for python
-==============================
+Dynamic python path package
+===========================
 
-Dynamic Python Path, dpythonpath, dynamically loading and setting pythonpath through a config file and code. The code use the configuration can be freely moved to different location.
+Dynamic python path, dpypath, is a Python library to provide the easy set at runtime.
 
 Installation
 ------------
@@ -10,23 +10,64 @@ Install using pip::
 
     pip install dpythonpath
 
-
 Usage
 -----
+Example 1 - general logging
 
 Python::
 
-    1) startup program call dpythonpath.set_config_file(conf_file='my_path.yml')
-       This may not needed, the file can be placed under where .git located, and discovered by dpythonpath
-       project
-         .git
-         dpythonpath/
-            config.yml
-       only if your put config.yml w/ different name or under different directory other than under dpythonpath/
-       then user need to call dpythonpath.set_config_file(conf_file='') method
+    from dlogging import DLogger, FORMATS, Fmt
 
-    2) any other python code just call dpathpath.set_path('id')
+    log1 = DLogger("log1")  # use default logging format, filename
+    log2 = DLogger("log2", log_fmt=FORMATS[Fmt.FNAME_LINENO_LEVEL])
+    log3 = DLogger("log3", log_enabled=False, cout_enabled=True)  # log to file disabled
 
+    def log_messages():
+        log1.info("msg #2")
+        log2.info("msg #3")
+        log3.error("msg #4") # message not logged to file, but display on stdout
+
+    log1.info("msg #1")
+    log_messages()
+
+By default, messages are logged in logs/app.log
+
+See tests/test_logging.py for more examples
+
+Example 2 - logging override
+
+Python::
+
+    import os
+    import logging
+    from dlogging import DLogger, LOG_CONF
+
+    def write_message(logger: logging.Logger) -> None:
+        logger.debug('debug message')
+        logger.info('info message')
+        logger.warning('warn message')
+        logger.error('error message')
+        logger.critical('critical message')
+
+    def message_count(filename: str) -> int:
+        if os.path.exists(filename):
+            with open(filename, "r") as f:
+                return len(f.readlines())
+        return 0
+
+    logger = DLogger(name="main", filename="app.log", log_level=logging.INFO)
+
+    write_message(logger)  # expect 4 messages written into logs/app.log
+    assert message_count("logs/app.log") == 4
+
+    # override log_level 'logging.INFO' w/ new log level 'logging.WARNING'
+    LOG_CONF.log_level = logging.WARNING  # set new log_level at LOG_CONF
+    LOG_CONF.override_logger_settings(True)  # this triggers log_level override
+
+    write_message(logger)  # expect 3 messages written into logs/app.log
+    assert message_count("logs/app.log") == 7  # expect total 7 messages
+
+See tests/test_override.py for more examples
 
 Contributing
 ------------

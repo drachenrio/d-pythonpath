@@ -1,0 +1,15 @@
+!!python/object:config.Config
+dependencies:
+- - !!python/object:config.PythonPath
+    name: dep_1
+    pythonpath:
+    - lib/py_lib
+    - graph/ml/lib
+    - ml/bert/py_lib
+- - !!python/object:config.PythonPath
+    name: dep_2
+    pythonpath:
+    - simulation/py_lib
+    - torch/python/lib
+    - bert/py_lib
+    - demo/env/lib
